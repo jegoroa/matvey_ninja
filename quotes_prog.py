@@ -38,6 +38,8 @@ class Hero(MegaClass):
 
         if self.jumped >= 0: 
             self.jumped -=1
+        else:
+            self.speed_y = 10
 
         self.rect.y += self.speed_y
 
@@ -58,39 +60,41 @@ class Hero(MegaClass):
 
         else:  
             self.speed_x = 0
+
+        self.rect.x += self.speed_x
+
         if keys[K_SPACE]: self.jump()
 
     def update(self):
         self.gravity()
-        self.ground_check()
+        self.verticle_ground_check()
+        self.horizontal_ground_check()
         self.control()
         self.draw()
-        self.rect.x += self.speed_x
-
         
-
-    def ground_check(self):
-        for  wall in walls:
+    def verticle_ground_check(self):
+        for wall in walls:
             if wall.rect.colliderect(self.rect):
-
-                if self.rect.top > wall.rect.bottom:
-                    self.rect.top = wall.rect.bottom + 3
-
-                if self.rect.left < wall.rect.left:
-                    self.speed_x = 0
-
-                if self.rect.right > wall.rect.right:
-                    self.speed_x = 0
-
-                if self.rect.top < wall.rect.bottom:
+                if self.speed_y > 0:
+                    self.rect.bottom = wall.rect.top
                     self.speed_y = 0
-                    return  0
-        if self.jumped <=0 :self.speed_y = 5
-        
 
+                elif self.speed_y < 0 and self.rect.top > wall.rect.bottom:
+                    self.rect.top = wall.rect.bottom
+                
+    def horizontal_ground_check(self):
+        for wall in walls:
+            if wall.rect.colliderect(self.rect):
+                #if self.rect.bottom < wall.rect.top:
+                    if self.speed_x > 0:
+                        self.rect.right = wall.rect.left
+                    elif self.speed_x < 0:
+                        self.rect.left = wall.rect.right
+                    
+ronin = Hero(300,100,100,150,"samurai.png")
+ronin.jumped = 0
+ronin.speed_y = 10
 
-Ronin = Hero(300,100,100,150,"samurai.png")
-Ronin.jumped = 0
 walls= sprite. Group()
 def load_level(n):
     pass
@@ -106,15 +110,17 @@ def save_level(n):
       
 
 levels ={}
-wall = Wall(x=0,h=50,w=1650,y=765, filename="стена.jpg")
+wall = Wall(x=300,h=50,w=165,y=765, filename="стена.jpg")
 wall = Wall(x=800,h=50,w=200,y=500, filename="стена.jpg")
 wall = Wall(x=0,h=50,w=200,y=600, filename="стена.jpg")
 
 spawn_w = 100
 spawn_h = 50
 
-while True:
+timer = time.Clock()
 
+while True:
+    timer.tick(60)
 
     for sobitye in event.get():
         if sobitye.type == KEYDOWN:
@@ -143,6 +149,6 @@ while True:
     
     
     win.blit(background,(0,0))
-    Ronin.update()
+    ronin.update()
     walls.update()
     display.update()
