@@ -95,32 +95,46 @@ ronin = Hero(300,100,100,150,"samurai.png")
 ronin.jumped = 0
 ronin.speed_y = 10
 
-walls= sprite. Group()
-def load_level(n):
-    pass
+walls= sprite.Group()
+
+def clear():
+    global walls
+    walls = sprite.Group()
+
+def load_levelS():
+    global levels
+    with open("levels.json","r",encoding="utf-8") as file:
+        levels = json.load(file)
+
+def bild_level(n):
+    global levels
+    if n in levels:
+        for wall in levels[n]:
+            Wall(wall[0],wall[1],wall[2],wall[3],
+                    "стена.jpg")
+    else:
+        print("уровни кончились!")
+
+load_levelS()
+bild_level("1")
 
 def save_level(n):
+    global levels
     levels[n] = []
     for wall in walls:
         levels[n].append([wall.rect.x,wall.rect.y,
                         wall.rect.w,wall.rect.h])
 
-    with  open("levels.json","w",encoding="utf-8")as file:
+    with open("levels.json","w",encoding="utf-8")as file:
         json.dump(levels,file)
-      
-
-levels ={}
-wall = Wall(x=300,h=50,w=165,y=765, filename="стена.jpg")
-wall = Wall(x=800,h=50,w=200,y=500, filename="стена.jpg")
-wall = Wall(x=0,h=50,w=200,y=600, filename="стена.jpg")
 
 spawn_w = 100
 spawn_h = 50
 
-timer = time.Clock()
-
+#timer = time.Clock()
+gamemode = 1
 while True:
-    timer.tick(60)
+    #timer.tick(60)
 
     for sobitye in event.get():
         if sobitye.type == KEYDOWN:
@@ -134,12 +148,15 @@ while True:
             if sobitye.key == K_LEFT: spawn_w -=30
             if sobitye.key == K_RIGHT: spawn_w +=30
 
-            if sobitye.key == K_c:
-                keys = key.get_pressed()
-                for n in [K_1,K_2,K_3,K_4,K_5,K_6,K_7,K_8,K_9]:
-                    if keys[n]:
-                        save_level(n-48)
+            if gamemode == 1:
+                if sobitye.key == K_c:
+                    keys = key.get_pressed()
+                    for n in [K_1,K_2,K_3,K_4,K_5,K_6,K_7,K_8,K_9]:
+                        if keys[n]:
+                            save_level(n-48)
 
+                if sobitye.key == K_BACKSPACE:
+                    clear()
 
         if sobitye.type == MOUSEBUTTONDOWN:
             x,y = sobitye.pos
